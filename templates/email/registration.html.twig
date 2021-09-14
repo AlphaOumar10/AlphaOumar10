@@ -1,0 +1,12 @@
+{# templates/email/registration.html.twig #}
+<h3>Enregistrement effectué</h3>
+
+Email : {{ mail }}!
+Code : {{ code }}
+Vos informations ci-dessus.
+
+{# example, assuming you have a route named "login" #}
+Rénitialisez votre mot de passe : <a href="{{ url('etudiant_password') }}">Appuyez</a>
+
+Merci!
+
