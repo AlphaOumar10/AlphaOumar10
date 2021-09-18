@@ -14,3 +14,7 @@ Les fonctionnalités sont développées par des api.
                   de réinitialiser son mot de passe)
 * Liste des admins par pays (les administrateurs sont listés en fonctions de leurs pays et avec leurs etudiants
                              inscrits)
+# Base de données 
+* Entités :
+  - Etudiant : (id, code, nom, prenom, pays, ville, email, password, roles)
+  - User : (id, nom, prenom, email, pays, password, role) : (Administrasteur et Super Administrateur)

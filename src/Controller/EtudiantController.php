@@ -29,6 +29,8 @@ class EtudiantController extends AbstractController
     {
          $this->passwordHasher = $passwordHasher;
     }
+
+    // Cette route affiche la liste des etudiants avec une certaine restriction des attributs 
     /**
      * @Route("etudiant/liste", name="etudiant_liste",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -41,6 +43,7 @@ class EtudiantController extends AbstractController
 
     }
 
+    // Cette route permet à l'etudiant de s'inscire une fois sur l'application par lui meme
     /**
      * @Route("etudiant/inscription", name="etudiant_inscription", methods={"POST"})
     */
@@ -89,6 +92,7 @@ class EtudiantController extends AbstractController
             return new Response('ok', 201);
     }
 
+    // Cette route permet à l'etudiant de se connecter
     /**
      * @Route("etudiant/login", name="etudiant_login", methods={"POST"})
     */

@@ -31,11 +31,14 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 class UserController extends AbstractController
 {
     private $passwordHasher;
+
     public function __construct(UserPasswordEncoderInterface $passwordHasher)
     {
          $this->passwordHasher = $passwordHasher;
     }
-    /**
+
+    // Cette route permet de lister les users avec une certaine restriction des attributs
+    /** 
      * @Route("admin/liste", name="admin_liste",methods={"GET"})
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
     */
@@ -58,8 +61,8 @@ class UserController extends AbstractController
         return $response;*/
     }
 
-
-    /**
+    //Cette route permet d'ajouter un utilisateur
+    /** 
      * @Route("admin/ajout", name="user_ajout", methods={"POST"})
     */
     public function addUser(Request $request)
@@ -82,6 +85,7 @@ class UserController extends AbstractController
             return new Response('ok', 201);
     }
 
+    // Cette route permet à l'administrateur d'inscrire(inserer) un étudiant du meme pays que lui
     /**
      * @Route("admin/insertion", name="admin_inserer", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -139,6 +143,7 @@ class UserController extends AbstractController
         return new Response('ok', 201);
     }
 
+    // Cette route affiche la liste des etudiants par administrateurs
     /**
      * @Route("admin/etudiants", name="admin_etudiants",methods={"GET"})
      * @Security("is_granted('ROLE_ADMIN')")
@@ -151,6 +156,7 @@ class UserController extends AbstractController
        
     }
 
+    // Cette route permet de réinitialiser le mot de passe d'un étudiant inscrit
     /**
      * @Route("/etudiant/password", name="etudiant_password", methods={"POST","GET"})
     */
@@ -177,7 +183,8 @@ class UserController extends AbstractController
         return $this->render('email/reset_password.html.twig');
     }
 
-       /**
+    // Cette route permet d'envoyer un email à l'étudiant afin d'accéder au lien pour s'inscrire
+    /**
      * @Route("admin/email", name="admin_email", methods={"POST"})
      * @Security("is_granted('ROLE_ADMIN')")
     */
@@ -188,7 +195,7 @@ class UserController extends AbstractController
      
         $message = (new \Swift_Message('Bienvenue'))
                         ->setFrom($donnees->user)
-                        ->setTo($donnees->email)
+                    ->setTo($donnees->email)
                         ->setBody(
                             $this->renderView(
                                 'email/mailer.html.twig',
@@ -202,6 +209,7 @@ class UserController extends AbstractController
         return new Response('ok', 201);
     }
 
+    // Cette route permet à l'étudiant de s'inscrire(formulaire) à l'aide d'un lien qu'il a recu par son administrateur
     /**
      * @Route("/etudiant/insertion", name="admin_inserer2", methods={"POST","GET"})
     */
