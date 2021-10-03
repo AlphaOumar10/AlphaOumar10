@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -64,9 +65,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $pays;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Groupe::class, cascade={"persist", "remove"})
+     */
+    private $groupe;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $birthdayAt;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $photo;
+
     public function __construct()
     {
         $this->etudiants = new ArrayCollection();
+        $this->birthdayAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -79,7 +96,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -130,7 +147,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(?string $password): self
     {
         $this->password = $password;
 
@@ -192,7 +209,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->nom;
     }
 
-    public function setNom(string $nom): self
+    public function setNom(?string $nom): self
     {
         $this->nom = $nom;
 
@@ -204,7 +221,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->prenom;
     }
 
-    public function setPrenom(string $prenom): self
+    public function setPrenom(?string $prenom): self
     {
         $this->prenom = $prenom;
 
@@ -216,9 +233,45 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->pays;
     }
 
-    public function setPays(string $pays): self
+    public function setPays(?string $pays): self
     {
         $this->pays = $pays;
+
+        return $this;
+    }
+
+    public function getGroupe(): ?Groupe
+    {
+        return $this->groupe;
+    }
+
+    public function setGroupe(?Groupe $groupe): self
+    {
+        $this->groupe = $groupe;
+
+        return $this;
+    }
+
+    public function getBirthdayAt(): ?\DateTimeImmutable
+    {
+        return $this->birthdayAt;
+    }
+
+    public function setBirthdayAt(\DateTimeImmutable $birthdayAt): self
+    {
+        $this->birthdayAt = $birthdayAt;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): self
+    {
+        $this->photo = $photo;
 
         return $this;
     }

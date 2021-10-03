@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Groupe</title>
+	<style type="text/css">
+     td{
+     	height: 40px;
+     }
+	</style>
+</head>
+<body>
+	<form action="{{ path('groupe_ajout')}}" method="post" enctype="multipart/form-data">
+
+		<fieldset>
+			<legend>Ajout d'un nouveau groupe</legend>
+			<table>
+				<tr>
+					<td><label>Titre</label></td>
+					<td><input type="text" name="titre" placeholder="Titre du groupe"/> </td>
+				</tr>
+				<tr>
+					<td><label>Type</label></td>
+					<td><input type="text" name="type" placeholder="Type"/></td>
+				</tr>
+				<tr>
+					<td><label>Description</label></td>
+					<td><textarea name="description" rows="4" cols="20"></textarea></td>
+				</tr>
+                <tr>
+					<td><label>Pays</label></td>
+					<td><input type="text" name="pays" placeholder="Pays"/> </td>
+				</tr>
+				<tr>
+					<td><label>Logo</label></td>
+					<td><input type="file" name="logo" placeholder="Logo"/></td>
+				</tr>
+				<tr>
+					<td><label>Photo</label></td>
+					<td><input type="file" name="photo" placeholder="Photo"/></td>
+				</tr>
+				<tr>
+					<td colspan="2"><input type="submit" value="Ajouter"/>  <input type="reset" value="Annuler"/></td>
+				</tr>
+			</table>
+		</fieldset>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Fiche etudiant{% endblock %}
+{% block body %}
+    <div class="p-5">
+        <div class="row">
+            <div class="col">
+                <h2>Fiche etudiant</h2>
+            </div>
+        </div>
+        <p>Photo de profil : <img src="{{ asset('uploads/' ~ etudiant.photo) }}" width="100" height="100"/></p>
+
+        <p>Nom : {{ etudiant.nom }}</p>
+        <p>Prenom : {{ etudiant.prenom }}</p>
+        <p>Email : {{ etudiant.email }}</p>
+        <p>Pays : {{ etudiant.pays }}</p>
+        <p>Né(e) le : {{ etudiant.birthdayAt|date('d/m/Y') }}</p>
+        
+    </div>
+{% endblock %}

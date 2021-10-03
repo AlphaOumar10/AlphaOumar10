@@ -34,13 +34,13 @@ class Etudiant implements UserInterface,PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Groups({"list"})
+     * @Groups({"list,groupe"})
      */
     private $codeE;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"list"})
+     * @Groups({"list,groupe"})
      */
     private $ville;
 
@@ -53,7 +53,7 @@ class Etudiant implements UserInterface,PasswordAuthenticatedUserInterface
      /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups({"list"})
+     * @Groups({"list,groupe"})
      */
     private $password;
 
@@ -64,14 +64,29 @@ class Etudiant implements UserInterface,PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Groups({"list"})
+     * @Groups({"list,groupe"})
      */
     private $email;
 
-        /**
+    /**
      * @ORM\Column(type="json")
-     */
+    */
     private $roles = [];
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Groupe::class, inversedBy="etudiants")
+     */
+    private $groupe;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     */
+    private $birthdayAt;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $photo;
 
     public function getId(): ?int
     {
@@ -231,6 +246,42 @@ class Etudiant implements UserInterface,PasswordAuthenticatedUserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getGroupe(): ?Groupe
+    {
+        return $this->groupe;
+    }
+
+    public function setGroupe(?Groupe $groupe): self
+    {
+        $this->groupe = $groupe;
+
+        return $this;
+    }
+
+    public function getBirthdayAt(): ?\DateTimeImmutable
+    {
+        return $this->birthdayAt;
+    }
+
+    public function setBirthdayAt(\DateTimeImmutable $birthdayAt): self
+    {
+        $this->birthdayAt = $birthdayAt;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): self
+    {
+        $this->photo = $photo;
 
         return $this;
     }

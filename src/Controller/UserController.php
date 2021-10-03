@@ -6,10 +6,15 @@ use App\Entity\Etudiant;
 use App\Entity\User;
 use App\Form\EtudiantType;
 use App\Repository\EtudiantRepository;
+use App\Repository\GroupeRepository;
 use App\Repository\UserRepository;
 use App\Services\MailerService;
 use App\Services\MessageService;
+use DateInterval;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpParser\Node\Expr\Cast\String_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +32,10 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Constraints\Date;
 
 class UserController extends AbstractController
 {
@@ -45,6 +54,7 @@ class UserController extends AbstractController
     public function index(UserRepository $data,SerializerInterface $serializer)
     {
         $users = $data->findAll();
+        //dd($this->getUser()->getId());
         return new JsonResponse($serializer->serialize($users,"json",
                                 ["groups" => ["users"]]),JsonResponse::HTTP_OK,[],true);
         /*
@@ -61,29 +71,165 @@ class UserController extends AbstractController
         return $response;*/
     }
 
-    //Cette route permet d'ajouter un utilisateur
+    //Cette route permet d'ajouter un administrateur
     /** 
-     * @Route("admin/ajout", name="user_ajout", methods={"POST"})
+     * @Route("admin/ajout", name="admin_ajout", methods={"POST","GET"})
     */
-    public function addUser(Request $request)
+    public function addAdmin(Request $request,EntityManagerInterface $entityManager,SluggerInterface $slugger)
+    { 
+
+            if ($request->getMethod() == 'POST') 
+            {
+                    $user = new User();
+
+                    $user->setNom($request->request->get('nom'));
+                    $user->setPrenom($request->request->get('prenom'));
+                    $user->setEmail($request->request->get('email'));
+                    $user->setPays($request->request->get('pays'));
+                    $start = new DateTimeImmutable($request->request->get('birthday'));
+                    $finish = $start->add(new DateInterval('P3D'));
+                    $start->format('Y-m-d');
+                    $user->setBirthdayAt($start);
+                    $user->setRoles(["ROLE_ADMIN"]);
+
+                    $imageFile = $request->files->get('photo');
+                    if ($imageFile) {
+                        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                        // this is needed to safely include the file name as part of the URL
+                        $safeFilename = $slugger->slug($originalFilename);
+                        $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+        
+                        // Move the file to the directory where brochures are stored
+                        try {
+                            $imageFile->move(
+                                $this->getParameter('image_directory'),
+                                $newFilename
+                            );
+                        } catch (FileException $e) {
+                        }
+
+                        $user->setPhoto($newFilename);
+                    }
+                $user->setPassword($this->passwordHasher->encodePassword($user, $request->request->get('password')));
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return $this->redirectToRoute('admin_connexion');
+            }
+        return $this->render('user/ajout.html.twig');
+    }
+
+    /** 
+     * @Route("admin/modifier", name="admin_modifier", methods={"POST","GET"})
+    */
+    public function modifierAdmin(Request $request,EntityManagerInterface $entityManager, SluggerInterface $slugger)
+    { 
+
+            if ($request->getMethod() == 'POST') 
+            {
+                    $user = new User();
+
+                    $user->setNom($request->request->get('nom'));
+                    $user->setPrenom($request->request->get('prenom'));
+                    $user->setEmail($request->request->get('email'));
+                    $user->setPays($request->request->get('pays'));
+                    $start = new DateTimeImmutable($request->request->get('birthday'));
+                    $finish = $start->add(new DateInterval('P3D'));
+                    $start->format('Y-m-d');
+                    $user->setBirthdayAt($start);
+                    $user->setRoles(["ROLE_ADMIN"]);
+                    $imageFile = $request->files->get('photo');
+                    if ($imageFile) {
+                        $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                        // this is needed to safely include the file name as part of the URL
+                        $safeFilename = $slugger->slug($originalFilename);
+                        $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+        
+                        // Move the file to the directory where brochures are stored
+                        try {
+                            $imageFile->move(
+                                $this->getParameter('image_directory'),
+                                $newFilename
+                            );
+                        } catch (FileException $e) {
+                        }
+
+                        $user->setPhoto($newFilename);
+                    }
+                    $user->setPassword($this->passwordHasher->encodePassword($user, $request->request->get('password')));
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                return $this->redirectToRoute('admin_connexion');
+            }
+        return $this->render('user/ajout.html.twig');
+    }
+
+    //Cette route permet à l'administrateur de se connecter
+    /** 
+     * @Route("admin/login", name="admin_connexion", methods={"POST","GET"})
+    */
+    public function loginAdmin(Request $request,UserRepository $data,EntityManagerInterface $entityManager)
     {
-            $user = new User();
+        $users = $data->findAll();
+        $table = [];
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
+        foreach ($users as $u)
+        {
+            $table[] = $u;
+        }
+        if ($request->getMethod() == 'POST') 
+        {
+            foreach ($table as $t)
+            {
+                if($t->getEmail() == $email && $t->getPassword())
+                {
+                    return $this->redirectToRoute('admin_liste');
+                }
+            }
+        }
+        return $this->render('user/connexion.html.twig');
+    }
 
-            $donnees = json_decode($request->getContent());
+    /**
+     * @Route("admin/one/{id}", name="admin_one", methods={"GET","POST"})
+    */
+    public function getOneUser(User $user,UserRepository $data, int $id,Request $request,SluggerInterface $slugger)
+    {
+        $user = $data->find($id);
+        if ($request->getMethod() == 'POST') 
+        {
+            $user->setNom($request->request->get('nom'));
+            $user->setPrenom($request->request->get('prenom'));
+            $user->setEmail($request->request->get('email'));
+            $user->setPays($request->request->get('pays'));
+            $user->setBirthdayAt(new DateTimeImmutable($request->request->get('birthday')));
+            $imageFile = $request->files->get('photo');
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-            $user->setEmail($donnees->email);
-            $user->setPassword($this->passwordHasher->encodePassword($user, $donnees->password));
-            $user->setRoles($donnees->roles);
-            $user->setNom($donnees->nom);
-            $user->setPrenom($donnees->prenom);
-            $user->setPays($donnees->pays);
+                // Move the file to the directory where brochures are stored
+                try {
+                    $imageFile->move(
+                        $this->getParameter('image_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                }
 
+                $user->setPhoto($newFilename);
+            }
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
-
-            return new Response('ok', 201);
+        }
+        return $this->render('user/affichage.html.twig', ['user' => $user]);
     }
+
 
     // Cette route permet à l'administrateur d'inscrire(inserer) un étudiant du meme pays que lui
     /**
@@ -213,8 +359,11 @@ class UserController extends AbstractController
     /**
      * @Route("/etudiant/insertion", name="admin_inserer2", methods={"POST","GET"})
     */
-    public function insererEtudiantCode(Request $request,UserRepository $data,EntityManagerInterface $entityManager)
+    public function insererEtudiantCode(Request $request,UserRepository $data,
+                                        GroupeRepository $data1,EntityManagerInterface $entityManager)
     {
+        $groupes = $data1->findAll();
+        $table1 = [];
         $users = $data->findAll();
         $table = [];
         $pays = $request->request->get('pays');
@@ -223,25 +372,80 @@ class UserController extends AbstractController
         {
             $table[] = $e;
         }
-        foreach ($table as $t)
+        foreach ($groupes as $g)
         {
-            if ($t->getPays() == $pays)
+            $table1[] = $g;
+        }
+        if ($request->getMethod() == 'POST') 
+        {
+            foreach ($table1 as $t1)
             {
-                $etudiant->setNom($request->request->get('nom'));
-                $etudiant->setPrenom($request->request->get('prenom'));
-                $etudiant->setCodeE($request->request->get('code'));
-                $etudiant->setEmail($request->request->get('email'));
-                $etudiant->setPays($request->request->get('pays'));
-                $etudiant->setVille($request->request->get('ville'));
-                $etudiant->setPassword($this->passwordHasher->encodePassword($t, $request->request->get('password')));
-                $t->addEtudiant($etudiant);
-                $entityManager->persist($etudiant);
-                $entityManager->persist($t);
+                foreach ($table as $t)
+                {
+                        if ($t1->getPays() == $pays && $t->getPays() == $pays)
+                        {
+                            $etudiant->setNom($request->request->get('nom'));
+                            $etudiant->setPrenom($request->request->get('prenom'));
+                            $etudiant->setCodeE($request->request->get('code'));
+                            $etudiant->setEmail($request->request->get('email'));
+                            $etudiant->setPays($request->request->get('pays'));
+                            $etudiant->setVille($request->request->get('ville'));
+                            $etudiant->setBirthdayAt(new DateTimeImmutable($request->request->get('birthday')));
+                            $etudiant->setPassword($this->passwordHasher->encodePassword($t, $request->request->get('password')));
+                            $photo = $request->files->get('photo');
+                            $photo_name = $photo->getClientOriginalName();
+                            $photo->move($this->getParameter("image_directory"),$photo_name);
+                            $etudiant->setPhoto($photo);
+                            $t1->addEtudiant($etudiant);
+                            $t->addEtudiant($etudiant);
+                            $entityManager->persist($etudiant);
+                            $entityManager->persist($t);
+                            $entityManager->persist($t1);
+                        }
+                    
+                }
+            
             }
         }
-        $entityManager->flush();
+            $entityManager->flush();
+            //return $this->redirectToRoute('etudiant_login');
 
         return $this->render('email/inscription.html.twig');
+    }
+
+    /**
+     * @Route("etudiant/one/{id}", name="etudiant_one", methods={"GET","POST"})
+    */
+    public function getOneEtudiant(Etudiant $etudiant,EtudiantRepository $data, int $id)
+    {
+        $etudiant = $data->find($id);
+        return $this->render('email/affichage.html.twig', ['etudiant' => $etudiant]);
+    }
+
+     /** 
+     * @Route("etudiant/login", name="etudiant_login", methods={"POST","GET"})
+    */
+    public function loginEtudiant(Request $request,EtudiantRepository $data,EntityManagerInterface $entityManager)
+    {
+        $etudiants = $data->findAll();
+        $table = [];
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
+        foreach ($etudiants as $e)
+        {
+            $table[] = $e;
+        }
+        if ($request->getMethod() == 'POST') 
+        {
+            foreach ($table as $t)
+            {
+                if($t->getEmail() == $email && $t->getPassword())
+                {
+                    return $this->redirectToRoute('etudiant_one',['id' => $t->getId()]);
+                }
+            }
+        }
+        return $this->render('email/connexion.html.twig');
     }
 
     

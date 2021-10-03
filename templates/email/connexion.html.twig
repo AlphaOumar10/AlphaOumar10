@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Connexion Etudiant</title>
+	<style type="text/css">
+     td{
+     	height: 40px;
+     }
+	</style>
+</head>
+<body>
+	<form action="{{ path('etudiant_login')}}" method="post" enctype="multipart/form-data">
+
+		<fieldset>
+			<legend>Connexion</legend>
+			<table>
+				<tr>
+					<td><label>Email</label></td>
+                    <td><input type="email" name="email" placeholder="Email"/></td>
+				</tr>
+                <tr>
+					<td><label>Mot de passe</label></td>
+					<td><input type="password" name="password" placeholder="Mot de passe"/></td>
+				</tr>
+				<tr>
+					<td colspan="2"><input type="submit" value="Se connecter"/>  <input type="reset" value="Annuler"/></td>
+				</tr>
+			</table>
+		</fieldset>
+    </form>
+
+</body>
+</html>

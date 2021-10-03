@@ -1,0 +1,26 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Groupe{% endblock %}
+{% block body %}
+    <div class="p-5">
+        <div class="row">
+            <div class="col">
+                <h2>Groupe</h2>
+            </div>
+        </div>
+        <p>Photo de profil : <img src="{{ asset('uploads/' ~ groupe.photo) }}" width="100" height="100"/></p>
+        <p>Photo de couverture : <img src="{{ asset('uploads/' ~ groupe.logo) }}" width="100" height="100"/></p>
+
+        <p>Titre : {{ groupe.titre }}</p>
+        <p>Description : {{ groupe.description }}</p>
+        <p>Pays : {{ groupe.pays }}</p>
+        <p>Etudiants :</p>
+        {% for etudiant in groupe.etudiants %}
+                <li>{{ etudiant.nom }}</li>
+                <li>{{ etudiant.prenom }}</li>
+                <li>{{ etudiant.email }}</li>
+                <li>{{ etudiant.pays }}</li>
+        {% endfor %}
+        
+    </div>
+{% endblock %}
