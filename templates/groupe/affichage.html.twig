@@ -14,13 +14,16 @@
         <p>Titre : {{ groupe.titre }}</p>
         <p>Description : {{ groupe.description }}</p>
         <p>Pays : {{ groupe.pays }}</p>
-        <p>Etudiants :</p>
-        {% for etudiant in groupe.etudiants %}
+        <div class="p-5">
+        <h2>Etudiants</h2>
+
+        <table class="table table-responsive">
+            {% for etudiant in groupe.etudiants %}
                 <li>{{ etudiant.nom }}</li>
                 <li>{{ etudiant.prenom }}</li>
                 <li>{{ etudiant.email }}</li>
                 <li>{{ etudiant.pays }}</li>
         {% endfor %}
-        
+        </table>
     </div>
 {% endblock %}

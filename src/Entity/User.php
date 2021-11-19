@@ -66,11 +66,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $pays;
 
     /**
-     * @ORM\OneToOne(targetEntity=Groupe::class, cascade={"persist", "remove"})
-     */
-    private $groupe;
-
-    /**
      * @ORM\Column(type="datetime_immutable")
      */
     private $birthdayAt;
@@ -80,10 +75,56 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $photo;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Publication::class, mappedBy="user")
+     */
+    private $publications;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Commentaire::class, inversedBy="users")
+    */
+    private $commentaires;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Commentaire::class, mappedBy="userss")
+     */
+    private $comments;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Messages::class, mappedBy="senderU", orphanRemoval=true)
+     */
+    private $sentUsers;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Messages::class, mappedBy="recipientU", orphanRemoval=true)
+     */
+    private $receiveUsers;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Groupe::class, mappedBy="user")
+     */
+    private $groupes;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Reponse::class, inversedBy="users")
+     */
+    private $reponse;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Reponse::class, mappedBy="reponseU")
+     */
+    private $reponses;
+
     public function __construct()
     {
         $this->etudiants = new ArrayCollection();
         $this->birthdayAt = new DateTimeImmutable();
+        $this->publications = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->sentUsers = new ArrayCollection();
+        $this->receiveUsers = new ArrayCollection();
+        $this->groupes = new ArrayCollection();
+        $this->reponses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -240,18 +281,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGroupe(): ?Groupe
-    {
-        return $this->groupe;
-    }
-
-    public function setGroupe(?Groupe $groupe): self
-    {
-        $this->groupe = $groupe;
-
-        return $this;
-    }
-
     public function getBirthdayAt(): ?\DateTimeImmutable
     {
         return $this->birthdayAt;
@@ -272,6 +301,210 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): self
     {
         $this->photo = $photo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Publication[]
+     */
+    public function getPublications(): Collection
+    {
+        return $this->publications;
+    }
+
+    public function addPublication(Publication $publication): self
+    {
+        if (!$this->publications->contains($publication)) {
+            $this->publications[] = $publication;
+            $publication->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePublication(Publication $publication): self
+    {
+        if ($this->publications->removeElement($publication)) {
+            // set the owning side to null (unless already changed)
+            if ($publication->getUser() === $this) {
+                $publication->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCommentaires(): ?Commentaire
+    {
+        return $this->commentaires;
+    }
+
+    public function setCommentaires(?Commentaire $commentaires): self
+    {
+        $this->commentaires = $commentaires;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Commentaire[]
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Commentaire $comment): self
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments[] = $comment;
+            $comment->setUserss($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Commentaire $comment): self
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getUserss() === $this) {
+                $comment->setUserss(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Messages[]
+     */
+    public function getSentUsers(): Collection
+    {
+        return $this->sentUsers;
+    }
+
+    public function addSentUser(Messages $sentUser): self
+    {
+        if (!$this->sentUsers->contains($sentUser)) {
+            $this->sentUsers[] = $sentUser;
+            $sentUser->setSenderU($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentUser(Messages $sentUser): self
+    {
+        if ($this->sentUsers->removeElement($sentUser)) {
+            // set the owning side to null (unless already changed)
+            if ($sentUser->getSenderU() === $this) {
+                $sentUser->setSenderU(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Messages[]
+     */
+    public function getReceiveUsers(): Collection
+    {
+        return $this->receiveUsers;
+    }
+
+    public function addReceiveUser(Messages $receiveUser): self
+    {
+        if (!$this->receiveUsers->contains($receiveUser)) {
+            $this->receiveUsers[] = $receiveUser;
+            $receiveUser->setRecipientU($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceiveUser(Messages $receiveUser): self
+    {
+        if ($this->receiveUsers->removeElement($receiveUser)) {
+            // set the owning side to null (unless already changed)
+            if ($receiveUser->getRecipientU() === $this) {
+                $receiveUser->setRecipientU(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Groupe[]
+     */
+    public function getGroupes(): Collection
+    {
+        return $this->groupes;
+    }
+
+    public function addGroupe(Groupe $groupe): self
+    {
+        if (!$this->groupes->contains($groupe)) {
+            $this->groupes[] = $groupe;
+            $groupe->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupe(Groupe $groupe): self
+    {
+        if ($this->groupes->removeElement($groupe)) {
+            // set the owning side to null (unless already changed)
+            if ($groupe->getUser() === $this) {
+                $groupe->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getReponse(): ?Reponse
+    {
+        return $this->reponse;
+    }
+
+    public function setReponse(?Reponse $reponse): self
+    {
+        $this->reponse = $reponse;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Reponse[]
+     */
+    public function getReponses(): Collection
+    {
+        return $this->reponses;
+    }
+
+    public function addReponse(Reponse $reponse): self
+    {
+        if (!$this->reponses->contains($reponse)) {
+            $this->reponses[] = $reponse;
+            $reponse->setReponseU($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponse(Reponse $reponse): self
+    {
+        if ($this->reponses->removeElement($reponse)) {
+            // set the owning side to null (unless already changed)
+            if ($reponse->getReponseU() === $this) {
+                $reponse->setReponseU(null);
+            }
+        }
 
         return $this;
     }

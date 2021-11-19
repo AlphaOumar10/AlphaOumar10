@@ -6,7 +6,11 @@ Code : {{ code }}
 Vos informations ci-dessus.
 
 {# example, assuming you have a route named "login" #}
-Rénitialisez votre mot de passe : <a href="{{ url('etudiant_password') }}">Appuyez</a>
+Acceder a votre profil : 
+Votre mot de passe par defaut est "pass".
+Vous pourriez le changer une fois connecter
+
+<a href="{{ path('etudiant_login')}}">Appuyez</a>
 
 Merci!
 

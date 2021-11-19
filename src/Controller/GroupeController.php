@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Groupe;
 use App\Repository\GroupeRepository;
+use App\Repository\PublicationRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,53 +27,48 @@ class GroupeController extends AbstractController
     }
 
     /**
-     * @Route("/groupe/ajout", name="groupe_ajout", methods={"POST","GET"})
+     * @Route("/groupe/ajout/{id}", name="groupe_ajout", methods={"POST","GET"})
     */
-    public function ajoutGroupe(Request $request,UserRepository $data,EntityManagerInterface $entityManager)
+    public function ajoutGroupe(Request $request,UserRepository $data,EntityManagerInterface $entityManager,int $id)
     {
-        $users = $data->findAll();
-        $table = [];
-        $pays = $request->request->get('pays');
+        $user = $data->find($id);
         $groupe = new Groupe();
-        foreach ($users as $e)
-        {
-            $table[] = $e;
-        }
+        
         if ($request->getMethod() == 'POST') 
         {
-            foreach ($table as $t)
-            {
-                if ($t->getPays() == $pays)
-                {
-                    $groupe->setTitre($request->request->get('titre'));
-                    $groupe->setDescription($request->request->get('description'));
-                    $groupe->setType($request->request->get('type'));
-                    $groupe->setPays($request->request->get('pays'));
-                    $logo = $request->files->get('logo');
-                    $logo_name = $logo->getClientOriginalName();
-                    $logo->move($this->getParameter("image_directory"),$logo_name);
-                    $photo = $request->files->get('photo');
-                    $photo_name = $photo->getClientOriginalName();
-                    $photo->move($this->getParameter("image_directory"),$photo_name);
-                    $groupe->setLogo($logo_name);
-                    $groupe->setPhoto($photo_name);
-                    $t->setGroupe($groupe);
-                    $entityManager->persist($groupe);
-                    $entityManager->persist($t);
-                }
-            }
+ 
+                $groupe->setTitre($request->request->get('titre'));
+                $groupe->setDescription($request->request->get('description'));
+                $groupe->setType("privée");
+                $groupe->setPays($user->getPays());
+                $logo = $request->files->get('logo');
+                $logo_name = $logo->getClientOriginalName();
+                $logo->move($this->getParameter("image_directory"),$logo_name);
+                $photo = $request->files->get('photo');
+                $photo_name = $photo->getClientOriginalName();
+                $photo->move($this->getParameter("image_directory"),$photo_name);
+                $groupe->setLogo($logo_name);
+                $groupe->setPhoto($photo_name);
+                $user->addGroupe($groupe);
+                $entityManager->persist($groupe);
+                $entityManager->persist($user);
         }
         $entityManager->flush();
 
-        return $this->render('groupe/ajout.html.twig');
+        return $this->render('groupe/ajout_groupe.html.twig', ['user' => $user]);
     }
     /**
-     * @Route("groupe/one/{id}", name="groupe_one", methods={"GET","POST"})
+     * @Route("groupe/one/{id}/{id1}", name="groupe_one", methods={"GET","POST"})
     */
-    public function getOneEtudiant(Groupe $groupe,GroupeRepository $data, int $id)
+    public function getOneGroupe(UserRepository $data1,GroupeRepository $data, int $id, int $id1)
     {
-        $groupe = $data->find($id);
-        return $this->render('groupe/affichage.html.twig', ['groupe' => $groupe]);
+        $user = $data1->find($id);
+        $groupe = $data->find($id1);
+        $publications = $groupe->getPublies();
+        //dd($publications);
+       // $groupe = $user->getGroupe();
+
+        return $this->render('groupe/liste_groupe.html.twig', ['groupe' => $groupe, 'user' => $user,'publications' => $publications]);
     }
 
     /**

@@ -1,0 +1,27 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Publication{% endblock %}
+{% block body %}
+    <div class="p-5">
+        <p><img src="{{ asset('uploads/' ~ publication.photo) }}" width="100" height="100"/></p>
+
+        <p>Contenu {{ publication.contenu }}</p>
+        <p>Liste des commentaires</p>
+        {% for pub in publication.commentaires %}
+            Commenter par <p>{{ pub.prenom }}</p> le <p>{{ pub.createAt|date('Y-m-d H:i:s') }}</p>
+            <p>{{ pub.contenu|raw }}</p> 
+                <p><a href="" data-reply data-id="{{pub.id}}"/>Repondre</p>
+
+        {% endfor %}
+    </div>
+    <form action="{{ path('publication_commentaire',{'id': publication.id })}}" method="post" enctype="multipart/form-data">
+                <label>Prenom</label>
+				<input type="text" name="prenom" placeholder="pre nom"/> 
+                <div class="col">
+                    <label>Ajouter un commentaire</label>
+                    <textarea name="comments" rows="4" cols="20"></textarea>
+                    <input type="submit" value="Ajouter"/>
+                </div>
+    </form>
+
+{% endblock %}

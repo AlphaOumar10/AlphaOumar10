@@ -59,9 +59,21 @@ class Groupe
      */
     private $etudiants;
 
+
+    /**
+     * @ORM\OneToMany(targetEntity=Publication::class, mappedBy="communaute")
+     */
+    private $publies;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="groupes")
+     */
+    private $user;
+
     public function __construct()
     {
         $this->etudiants = new ArrayCollection();
+        $this->publies = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -167,6 +179,51 @@ class Groupe
                 $etudiant->setGroupe(null);
             }
         }
+
+        return $this;
+    }
+
+   
+
+    
+    /**
+     * @return Collection|Publication[]
+     */
+    public function getPublies(): Collection
+    {
+        return $this->publies;
+    }
+
+    public function addPubly(Publication $publy): self
+    {
+        if (!$this->publies->contains($publy)) {
+            $this->publies[] = $publy;
+            $publy->setCommunaute($this);
+        }
+
+        return $this;
+    }
+
+    public function removePubly(Publication $publy): self
+    {
+        if ($this->publies->removeElement($publy)) {
+            // set the owning side to null (unless already changed)
+            if ($publy->getCommunaute() === $this) {
+                $publy->setCommunaute(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
